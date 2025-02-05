@@ -1,3 +1,12 @@
 dnspython
 python-dotenv
 dnstwist[full]
+selenium
+undetected-chromedriver
+bs4
+fuzzywuzzy
+urllib3
+requests
+webdriver_manager
+selenium_stealth
+stem
