@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from fuzzywuzzy import fuzz
 import os
 from dotenv import load_dotenv
-import re
+from analyse_ipinfo import analyser_sites_frauduleux
 
 load_dotenv()
 
@@ -133,7 +133,7 @@ def generer_variantes_dnstwist(domaines):
 
 
 def comparer_sites(sites_trouves, seuil_pourcent=10):
-    """Compare les structures HTML des sites suspects avec celles du site officiel et garde ceux avec une similarité >30%."""
+    """Compare les structures HTML des sites suspects avec celles du site officiel et garde ceux avec une similarité > seuil%."""
     print("\n🔍 Comparaison de la structure HTML avec le site officiel et ses variantes...")
 
     # Récupérer la structure HTML de toutes les variantes officielles
@@ -168,28 +168,32 @@ def comparer_sites(sites_trouves, seuil_pourcent=10):
 
         # 📊 Comparer avec toutes les variantes et garder l'URL officielle avec le score le plus élevé
         meilleur_score = 0
-        meilleure_variation = "Aucune correspondance"  # ✅ Correction
+        meilleure_variation = "Aucune correspondance"
 
         for url_off, structure_txt in structures_officielles_txt.items():
             score = fuzz.token_sort_ratio(structure_txt, structure_suspecte_txt)
 
-            # ✅ Vérifier si ce score est le meilleur trouvé pour ce site suspect
             if score > meilleur_score:
                 meilleur_score = score
-                meilleure_variation = url_off  # ✅ On met bien à jour le site officiel de référence !
+                meilleure_variation = url_off
 
-        print(f"📊 Similarité avec {url_suspect} (meilleur match : {meilleure_variation}) : {meilleur_score}%")
+        # 🔎 Récupérer l'adresse IP du site frauduleux
+        try:
+            ip_frauduleuse = socket.gethostbyname(url_suspect.replace("http://", "").replace("https://", ""))
+        except socket.gaierror:
+            ip_frauduleuse = "Inconnue"
 
-        # Si la similarité est supérieure au seuil, on garde ce site suspect pour la prochaine boucle
+        print(f"📊 Similarité avec {url_suspect} (meilleur match : {meilleure_variation}) : {meilleur_score}% | IP : {ip_frauduleuse}")
+
         if meilleur_score >= seuil_pourcent:
-            sites_frauduleux.append((url_suspect, meilleur_score))
+            sites_frauduleux.append((url_suspect, meilleur_score, ip_frauduleuse))
 
     # 🔽 Trier par similarité décroissante et stocker dans un fichier
     sites_frauduleux.sort(key=lambda x: x[1], reverse=True)
 
     with open("sites_frauduleux.txt", "w") as f:
-        for site, score in sites_frauduleux:
-            f.write(f"{site} - {score}%\n")
+        for site, score, ip in sites_frauduleux:
+            f.write(f"{site} - {score}% - IP: {ip}\n")
 
     print(f"✅ {len(sites_frauduleux)} sites frauduleux enregistrés dans sites_frauduleux.txt.")
 
@@ -234,6 +238,17 @@ def explorer_domaines(domaines):
 
     return domaines_testes
 
-# Lancer l'exploration et comparer avec le vrai site
-sites_trouves = explorer_domaines(domaines_base)
-print(f"\n🎯 Exploration terminée. Total de {len(sites_trouves)} sites trouvés et comparés.")
+def main():
+    mode = input("Voulez-vous chercher des nom de sites de fishing pa rapport à un site (1) sinon avoir les informations des IP de sites (2) ?")
+    if mode == "1":
+         # Lancer l'exploration et comparer avec le vrai site
+        sites_trouves = explorer_domaines(domaines_base)
+        print(f"\n🎯 Exploration terminée. Total de {len(sites_trouves)} sites trouvés et comparés.")
+    elif mode == "2":
+        analyser_sites_frauduleux()
+    else:
+        print("Choix invalide. Veuillez entrer 1 ou 2.")
+
+
+if __name__ == "__main__":
+    main()
