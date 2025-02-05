@@ -1,116 +1,64 @@
+# Analyse et Détection de Sites de Phishing
 
-## 🛡️ Check Site Variant - Détection de sites frauduleux
+## Description
+Ce projet permet d'identifier des sites frauduleux similaires à un site officiel donné et d'analyser les informations IP des sites détectés. Il s'appuie sur les outils **dnstwist**, **BeautifulSoup**, **FuzzyWuzzy**, et l'API **ipinfo.io**.
 
-Ce script permet de **détecter des sites web suspects** en générant des variantes de domaines, en testant leur accessibilité et en comparant leur structure HTML avec celle du site officiel et ses variantes.  
+## Fonctionnalités
+1. **Détection de sites de phishing** :
+   - Génération de variantes de domaines via **dnstwist**.
+   - Vérification de l'existence et de l'accessibilité des domaines générés.
+   - Scraping de la structure HTML des sites trouvés.
+   - Comparaison avec la structure HTML du site officiel et de ses variantes.
+   - Stockage des sites frauduleux détectés dans `sites_frauduleux.txt`.
 
-🔍 **Objectifs du script :**  
-✅ Générer des variantes de domaines à partir d'un domaine officiel  
-✅ Vérifier si ces domaines sont accessibles  
-✅ Comparer leur structure HTML avec celle du site officiel  
-✅ Identifier les sites frauduleux ayant une **similarité supérieure à 10%**  
+2. **Analyse des IP des sites frauduleux** :
+   - Lecture des domaines stockés dans `sites_frauduleux.txt`.
+   - Récupération des informations des IP via **ipinfo.io**.
+   - Génération d'un rapport détaillé dans `sites_frauduleux_ipinfo.txt`.
 
----
+## Installation
+### Prérequis
+- **Python 3.x**
+- **pip** (gestionnaire de paquets Python)
 
-## 📦 Installation
-
-### 1️⃣ Cloner le dépôt  
-```bash
-git clone https://github.com/ton-repo/Check_Site_Variant.git
-cd Check_Site_Variant
-```
-
-### 2️⃣ Créer un environnement virtuel  
-```bash
-python -m venv .venv
-```
-Activer l'environnement virtuel :
-- **Windows** :  
-  ```bash
-  .venv\Scripts\activate
-  ```
-- **Mac/Linux** :  
-  ```bash
-  source .venv/bin/activate
-  ```
-
-### 3️⃣ Installer les dépendances  
-```bash
+### Installation des dépendances
+Exécute la commande suivante pour installer toutes les bibliothèques requises :
+```sh
 pip install -r requirements.txt
 ```
 
-### 4️⃣ Configurer les variables d'environnement  
-Créer un fichier **`.env`** à la racine du projet et y ajouter :
-```env
-SITE_OFFICIEL=exemple.com
-VARIANTS_SITE_OFFICIEL=exemple.com,exemple.com
-EXEMPLES_COPIE=exemple1.com,exemple2.com
+### Configuration
+Créer un fichier `.env` à la racine du projet contenant :
 ```
-- `SITE_OFFICIEL` : Le site légitime à analyser  
-- `VARIANTS_SITE_OFFICIEL` : D'autres domaines connus appartenant à l'organisation  
-- `EXEMPLES_COPIE` : D'autres versions du site officiel utilisées pour comparaison  
+SITE_OFFICIEL=exemple.com
+EXEMPLES_COPIE=exemple.com,exemple2.com
+VARIANTS_SITE_OFFICIEL=exemple,exemple2,exemple3    #sans le .com
+IPINFO_API_KEY=YOUR_IPINFO_API_KEY
+```
+- Remplace `YOUR_IPINFO_API_KEY` par ta clé API ipinfo.io.
+- Les `VARIANTS_SITE_OFFICIEL` ne doit pas avoir de .xxx
 
----
-
-## 🚀 Utilisation
-
-Lancer le script :
-```bash
+## Utilisation
+Lancer le script principal :
+```sh
 python main.py
 ```
+Une question te sera posée :
+- **1** : Recherche des sites frauduleux similaires au site officiel.
+- **2** : Analyse des IP des sites frauduleux listés dans `sites_frauduleux.txt`.
 
-Le programme :
-1. **Génère des variantes de domaine**
-2. **Teste leur accessibilité**
-3. **Scrape leur contenu HTML**
-4. **Compare avec le site officiel**
-5. **Stocke les sites suspects dans `sites_frauduleux.txt`**
+## Fichiers Importants
+- **`main.py`** : Point d'entrée du script.
+- **`fishing_sites_script.py`** : Recherche et analyse des sites de phishing.
+- **`analyse_ipinfo.py`** : Analyse des IP des sites frauduleux.
+- **`sites_frauduleux.txt`** : Liste des sites frauduleux détectés.
+- **`sites_frauduleux_ipinfo.txt`** : Détails des IP et hébergeurs des sites frauduleux.
 
----
+## Améliorations Futures
+- Ajout d'une interface graphique.
+- Intégration d'autres bases de données pour vérifier les sites suspects.
+- Envoi de rapports automatiques par email.
 
-## 📊 Résultats
+## Auteurs
+- **Paul Berdier**
 
-- Les sites détectés comme frauduleux sont enregistrés dans :
-  ```
-  sites_frauduleux.txt
-  ```
-  avec leur score de similarité.
-  
-- Tous les résultats sont également journalisés dans :
-  ```
-  resultats.log
-  ```
-
----
-
-## 🔧 Personnalisation
-
-Tu peux ajuster le **seuil de détection** des sites frauduleux dans le fichier `main.py` :  
-```python
-def comparer_sites(sites_trouves, seuil_pourcent=10):
-```
-- Augmente la valeur (`30`, `50`) pour **réduire** le nombre de faux positifs  
-- Diminue la valeur (`5`, `10`) pour **être plus permissif**  
-
----
-
-## 🛠️ Dépendances
-
-Les bibliothèques Python utilisées :
-```txt
-requests
-beautifulsoup4
-fuzzywuzzy
-dnstwist
-dotenv
-```
-
-Installer une dépendance manquante :
-```bash
-pip install nom_du_module
-```
-
----
-
-## 📩 Contact
-
-Si tu rencontres un problème ou veux améliorer le script, ouvre une **issue** sur le repo GitHub.
