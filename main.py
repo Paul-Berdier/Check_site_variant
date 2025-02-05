@@ -131,7 +131,8 @@ def generer_variantes_dnstwist(domaines):
 
     return list(variantes)
 
-def comparer_sites(sites_trouves, seuil_pourcent=30):
+
+def comparer_sites(sites_trouves, seuil_pourcent=10):
     """Compare les structures HTML des sites suspects avec celles du site officiel et garde ceux avec une similarité >30%."""
     print("\n🔍 Comparaison de la structure HTML avec le site officiel et ses variantes...")
 
@@ -167,13 +168,15 @@ def comparer_sites(sites_trouves, seuil_pourcent=30):
 
         # 📊 Comparer avec toutes les variantes et garder l'URL officielle avec le score le plus élevé
         meilleur_score = 0
-        meilleure_variation = ""
+        meilleure_variation = "Aucune correspondance"  # ✅ Correction
 
         for url_off, structure_txt in structures_officielles_txt.items():
             score = fuzz.token_sort_ratio(structure_txt, structure_suspecte_txt)
+
+            # ✅ Vérifier si ce score est le meilleur trouvé pour ce site suspect
             if score > meilleur_score:
                 meilleur_score = score
-                meilleure_variation = url_off
+                meilleure_variation = url_off  # ✅ On met bien à jour le site officiel de référence !
 
         print(f"📊 Similarité avec {url_suspect} (meilleur match : {meilleure_variation}) : {meilleur_score}%")
 
@@ -192,6 +195,7 @@ def comparer_sites(sites_trouves, seuil_pourcent=30):
 
     # Ne renvoyer que les domaines suspects qui ont dépassé le seuil
     return [site[0].replace("http://", "").replace("https://", "") for site in sites_frauduleux]
+
 
 def explorer_domaines(domaines):
     """Teste les domaines et les variantes de manière itérative jusqu'à épuisement."""
